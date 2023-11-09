@@ -1,0 +1,118 @@
+@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@200;300;400;500;600;700;800;900;1000&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Rubik:wght@300&display=swap');
+
+* {
+    margin: 0;
+    padding: 0;
+    font-family: 'Poppins', sans-serif;
+    font-size: 1em;
+    box-sizing:border-box;  
+}
+.container{
+    width: 100%;
+    min-height: 100vh;
+    background: linear-gradient(135deg,#80ff83,#80d6ff);
+    padding: 10px;
+}
+
+.todo-app{
+    width: 100%;
+   min-width: 50%;
+    background: #111a29;
+    margin: 100px auto 20px;
+    padding: 40px 30px 70px;
+    border-radius:10px;
+}
+.todo-app h2{
+    color:#8ee9f3;
+    display:flex;
+    align-items: center;
+    margin-bottom:20px;
+}
+.todo-app h2 img{
+    width: 30px;
+    margin-left: 10px;
+}
+.row{
+    display:flex;
+    align-items: center;
+    justify-content: space-between;
+    background:#fffffffc;
+    border-radius:30px;
+    padding-left: 20px;
+    margin-bottom: 25px;
+    box-shadow:4px 4px 4px #55ffff9f;
+}
+input{
+    flex:1;
+    border: none;
+    outline: none;
+    background: transparent;
+    padding: 10px;
+}
+button{
+    border: none;
+    outline: none;
+    background: #8ee9f3;
+    padding: 16px 30px;
+    color:#111a29;
+    border-radius:40px;
+    font-weight:600;
+    font-size:16px;
+    cursor:pointer;   
+}
+ul li{
+    list-style:none;
+    font-size:17px;
+    padding: 12px 8px 12px 50px;
+    user-select:none;
+    cursor:pointer;
+    color:#fff;
+    position: relative;
+}
+ul li::before {
+    content:'';
+    position: absolute;
+    height: 28px;
+    width: 28px;
+    border-radius:50%;
+    background-image: url("/photo/download 2.png");
+    background-size: cover;
+    background-position: center;
+    top: 12px;
+    left: 8px;   
+}
+ul li.checked{
+    color:#8ee9f3;
+    text-decoration:line-through;   
+}
+ul li.checked::before{
+    background-image: url("/photo/download.png");
+} 
+ 
+ul li span{
+    right: 0px;
+    position: absolute;
+    top: 5px;
+    width: 40px;
+    height: 40px;
+    font-size: 22px;
+    color: #8ee9f3;
+    line-height:40px;
+    text-align: center; 
+    margin-left: 30px;
+    border-radius: 50%;
+    padding:0px 5px;
+}
+ul li span:hover{
+    background:#bfffff80;
+}
+@media (width>600px){
+.container{
+  display:flex;
+  justify-content: center;
+  align-items: center;
+}
+  .todo-app{
+    width: 50%;
+  }
+}
