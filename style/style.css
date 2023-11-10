@@ -10,6 +10,7 @@
 .container{
     width: 100%;
     min-height: 100vh;
+    height: auto;
     background: linear-gradient(135deg,#80ff83,#80d6ff);
     padding: 10px;
 }
@@ -22,16 +23,19 @@
     padding: 40px 30px 70px;
     border-radius:10px;
 }
+
 .todo-app h2{
     color:#8ee9f3;
     display:flex;
     align-items: center;
     margin-bottom:20px;
 }
+
 .todo-app h2 img{
     width: 30px;
     margin-left: 10px;
 }
+
 .row{
     display:flex;
     align-items: center;
@@ -42,6 +46,7 @@
     margin-bottom: 25px;
     box-shadow:4px 4px 4px #55ffff9f;
 }
+
 input{
     flex:1;
     border: none;
@@ -49,6 +54,7 @@ input{
     background: transparent;
     padding: 10px;
 }
+
 button{
     border: none;
     outline: none;
@@ -60,6 +66,7 @@ button{
     font-size:16px;
     cursor:pointer;   
 }
+
 ul li{
     list-style:none;
     font-size:17px;
@@ -69,24 +76,27 @@ ul li{
     color:#fff;
     position: relative;
 }
+
 ul li::before {
     content:'';
     position: absolute;
     height: 28px;
     width: 28px;
     border-radius:50%;
-    background-image: url("/photo/download two.png");
+    background-image: url("https://media.discordapp.net/attachments/970799663068348486/1172631629169172572/download_two.png?ex=6561054e&is=654e904e&hm=28f0ca78a0b8dd79b3d1b5f9bd2bb491202a96c8628759af62c877f33658361c&=");
     background-size: cover;
     background-position: center;
     top: 12px;
     left: 8px;   
 }
+
 ul li.checked{
     color:#8ee9f3;
     text-decoration:line-through;   
 }
+
 ul li.checked::before{
-    background-image: url("/photo/download.png");
+    background-image: url("https://media.discordapp.net/attachments/970799663068348486/1172631629555040397/download.png?ex=6561054e&is=654e904e&hm=5107749c675748705e07b8cb010d3fa09bf713b9fa8fdc9ed606ceb29442610c&=");
 } 
  
 ul li span{
@@ -106,6 +116,31 @@ ul li span{
 ul li span:hover{
     background:#bfffff80;
 }
+
+.footer{
+    background: linear-gradient(135deg,#80ff83,#80d6ff);
+    padding: 2em;
+    /* display: flex; */
+    text-align: center;
+}
+
+.footer-title{
+    font-size: 1em;
+    font-weight: 600;
+    text-align: center;
+}
+
+.footer-title span{
+    color: darkblue;
+    /* border: 2px rgb(104, 73, 73) solid; */
+    text-align: center;
+}
+
+.footer-title a{
+    color: darkblue;
+    text-decoration: none;
+}
+
 @media (width>600px){
 .container{
   display:flex;
