@@ -1,7 +1,7 @@
 {
   "name": "To-Do List احترافية",
   "short_name": "ToDo",
-  "start_url": "./index.html",
+  "start_url": "/",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#2575fc",
@@ -10,4 +10,3 @@
     { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png" }
   ]
 }
-

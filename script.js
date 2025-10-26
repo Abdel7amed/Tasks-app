@@ -1,4 +1,4 @@
-// script.js - محدث
+// script.js - مُحدّث (عرض الوقت عبر الكلاس، طلب الإذن عند الضغط، تسجيل SW)
 
 // ======== أصوات افكت ========
 const audioAdd = new Audio('https://www.soundjay.com/buttons/sounds/button-3.mp3');
@@ -21,7 +21,17 @@ let notificationsEnabled = (localStorage.getItem('notifications-enabled') === 't
 let currentFilter = 'all';
 let notifyChecker = null;
 
-// ======== Dark Mode - تحميل الحالة ========
+// ======== Utilities ========
+function saveTasks(){ localStorage.setItem('tasks', JSON.stringify(tasks || [])); }
+function loadTasks(){ tasks = JSON.parse(localStorage.getItem('tasks') || '[]'); }
+function showMessage(msg, duration=2000){
+    messageBox.textContent = msg;
+    messageBox.classList.add('show');
+    clearTimeout(showMessage._t);
+    showMessage._t = setTimeout(()=> messageBox.classList.remove('show'), duration);
+}
+
+// ======== Dark Mode - تحميل الحالة وتبديلها ========
 if(localStorage.getItem('dark-mode')==='enabled'){
     document.body.classList.add('dark-mode');
 }
@@ -30,7 +40,7 @@ darkModeBtn.addEventListener('click', ()=> {
     localStorage.setItem('dark-mode', document.body.classList.contains('dark-mode') ? 'enabled' : 'disabled');
 });
 
-// ======== Notifications & Time Input (animated show/hide) ========
+// ======== Notifications UI (باستخدام class .show لعنصر الوقت) ========
 function setNotifyUIState(enabled){
     if(enabled){
         taskTime.classList.add('show');
@@ -40,26 +50,31 @@ function setNotifyUIState(enabled){
         notifyBtn.classList.remove('active');
     }
 }
-// initial UI state
 setNotifyUIState(notificationsEnabled);
 
-// click toggle
+// ======== زر التنبيه: نطلب الإذن هنا فقط عند تفاعل المستخدم ========
 notifyBtn.addEventListener('click', async ()=> {
     if(!notificationsEnabled){
-        const permission = await Notification.requestPermission();
-        if(permission==='granted'){
-            notificationsEnabled = true;
-            localStorage.setItem('notifications-enabled','true');
-            setNotifyUIState(true);
-            showMessage("تم تفعيل التنبيهات 🔔");
-            startNotifyChecker();
+        if('Notification' in window){
+            // نطلب إذن الإشعارات فقط عند ضغط المستخدم
+            const permission = await Notification.requestPermission();
+            if(permission === 'granted'){
+                notificationsEnabled = true;
+                localStorage.setItem('notifications-enabled','true');
+                setNotifyUIState(true);
+                showMessage("تم تفعيل التنبيهات 🔔");
+                startNotifyChecker();
+            } else {
+                notificationsEnabled = false;
+                localStorage.setItem('notifications-enabled','false');
+                setNotifyUIState(false);
+                showMessage("لم يتم تفعيل التنبيهات ❌");
+            }
         } else {
-            showMessage("لم يتم تفعيل التنبيهات ❌");
-            notificationsEnabled = false;
-            localStorage.setItem('notifications-enabled','false');
-            setNotifyUIState(false);
+            showMessage("المتصفح لا يدعم الإشعارات ❌");
         }
     } else {
+        // إيقاف التنبيهات
         notificationsEnabled = false;
         localStorage.setItem('notifications-enabled','false');
         setNotifyUIState(false);
@@ -68,16 +83,7 @@ notifyBtn.addEventListener('click', async ()=> {
     }
 });
 
-// ======== Helper Functions ========
-function saveTasks(){ localStorage.setItem('tasks', JSON.stringify(tasks)); }
-function loadTasks(){ tasks = JSON.parse(localStorage.getItem('tasks')) || []; }
-function showMessage(msg, duration=2000){
-    messageBox.textContent = msg;
-    messageBox.classList.add('show');
-    setTimeout(()=> messageBox.classList.remove('show'), duration);
-}
-
-// ======== Time-check & messages ========
+// ======== Check Task Time & messages ========
 function checkTaskTime(task){
     if(!task.time) return;
     const now = new Date();
@@ -86,6 +92,9 @@ function checkTaskTime(task){
     taskDate.setHours(hour, minute, 0, 0);
 
     if(!task.completed && now > taskDate){
+        if(notificationsEnabled && 'Notification' in window && Notification.permission === 'granted'){
+            new Notification(`⏰ المهمة متأخرة: ${task.text}`);
+        }
         showMessage(`⏰ تأخرت عن المهمة: ${task.text}`, 2500);
     } else if(task.completed && now < taskDate){
         const phrases = [
@@ -120,10 +129,10 @@ filterButtons.forEach(btn=> {
 // ======== Add Task ========
 addBtn.addEventListener('click', ()=> {
     const text = taskInput.value.trim();
-    const time = taskTime.value;
+    const time = taskTime.classList.contains('show') ? taskTime.value : '';
     const category = taskCategory.value.trim() || 'عام';
 
-    if(text!==''){
+    if(text !== ''){
         const newTask = {
             id: Date.now(),
             text,
@@ -140,6 +149,8 @@ addBtn.addEventListener('click', ()=> {
         showMessage(`تم إضافة المهمة 🎉: ${text}`);
         audioAdd.play();
         taskInput.value=''; taskTime.value=''; taskCategory.value='';
+    } else {
+        showMessage('اكتب المهمة أولاً 🙃', 1500);
     }
 });
 taskInput.addEventListener('keypress', e=>{ if(e.key==='Enter') addBtn.click(); });
@@ -152,18 +163,35 @@ function createTaskElement(task){
 
     const infoDiv = document.createElement('div');
     infoDiv.className = 'task-info';
+    infoDiv.style.display = 'flex';
+    infoDiv.style.flexDirection = 'column';
+    infoDiv.style.gap = '6px';
 
     const textSpan = document.createElement('span');
     textSpan.textContent = task.text;
     infoDiv.appendChild(textSpan);
 
+    const metaSpan = document.createElement('div');
+    metaSpan.style.display = 'flex';
+    metaSpan.style.alignItems = 'center';
+    metaSpan.style.gap = '8px';
+    metaSpan.style.flexWrap = 'wrap';
+
     if(task.category){
         const catSpan = document.createElement('span');
         catSpan.textContent = `[${task.category}]`;
         catSpan.className = 'task-category';
-        infoDiv.appendChild(catSpan);
+        metaSpan.appendChild(catSpan);
     }
 
+    if(task.time){
+        const timeLabel = document.createElement('span');
+        timeLabel.textContent = task.time;
+        timeLabel.className = 'time-label';
+        metaSpan.appendChild(timeLabel);
+    }
+
+    infoDiv.appendChild(metaSpan);
     li.appendChild(infoDiv);
 
     const rightDiv = document.createElement('div');
@@ -171,18 +199,12 @@ function createTaskElement(task){
     rightDiv.style.alignItems = 'center';
     rightDiv.style.gap = '10px';
 
-    if(task.time){
-        const timeLabel = document.createElement('span');
-        timeLabel.textContent = task.time;
-        timeLabel.className = 'time-label';
-        rightDiv.appendChild(timeLabel);
-    }
-
     const deleteBtn = document.createElement('button');
     deleteBtn.textContent = 'حذف';
     deleteBtn.className = 'delete-btn';
+    deleteBtn.type = 'button';
     deleteBtn.addEventListener('click', (e)=> {
-        e.stopPropagation(); // منع الفتح عند حذف
+        e.stopPropagation();
         audioDelete.play();
         tasks = tasks.filter(t=>t.id!==task.id);
         saveTasks();
@@ -195,17 +217,15 @@ function createTaskElement(task){
     li.appendChild(rightDiv);
 
     li.addEventListener('click', e=>{
-        if(e.target.tagName!=='BUTTON'){
+        if(e.target.tagName !== 'BUTTON'){
             task.completed = !task.completed;
-            if(!task.completed) task.lastNotifiedMinute = null; // إعادة التفعيل لاحقاً
+            if(!task.completed) task.lastNotifiedMinute = null;
             saveTasks();
             renderTasks();
             updateFilterCounts();
             if(task.completed){
-                li.classList.add('flash');
                 audioComplete.play();
                 checkTaskTime(task);
-                setTimeout(()=>li.classList.remove('flash'),500);
             } else {
                 checkTaskTime(task);
             }
@@ -223,9 +243,9 @@ function renderTasks(){
     taskList.innerHTML='';
     let filteredTasks = tasks;
 
-    if(currentFilter==='completed') filteredTasks = tasks.filter(t=>t.completed);
-    else if(currentFilter==='pending') filteredTasks = tasks.filter(t=>!t.completed);
-    else if(currentFilter!=='all') filteredTasks = tasks.filter(t=>t.category===currentFilter);
+    if(currentFilter === 'completed') filteredTasks = tasks.filter(t=>t.completed);
+    else if(currentFilter === 'pending') filteredTasks = tasks.filter(t=>!t.completed);
+    else if(currentFilter !== 'all') filteredTasks = tasks.filter(t=>t.category === currentFilter);
 
     filteredTasks.sort((a,b)=>{
         if(!a.time) return 1;
@@ -233,10 +253,10 @@ function renderTasks(){
         return a.time.localeCompare(b.time);
     });
 
-    filteredTasks.forEach(task=> taskList.appendChild(createTaskElement(task)));
+    filteredTasks.forEach(task => taskList.appendChild(createTaskElement(task)));
 }
 
-// ======== Notifications checker (send once per minute per task) ========
+// ======== Notifications Checker ========
 function startNotifyChecker(){
     if(notifyChecker) return;
     notifyChecker = setInterval(()=> {
@@ -248,15 +268,16 @@ function startNotifyChecker(){
                 const [h,m] = task.time.split(':').map(Number);
                 if(h === now.getHours() && m === now.getMinutes()){
                     if(task.lastNotifiedMinute !== currentMinuteKey){
-                        // إرسال تنبيه وحفظ علامة
-                        new Notification(`⏰ مهمة: ${task.text}`);
+                        if('Notification' in window && Notification.permission === 'granted') {
+                            new Notification(`⏰ المهمة متأخرة: ${task.text}`);
+                        }
                         task.lastNotifiedMinute = currentMinuteKey;
                         saveTasks();
                     }
                 }
             }
         });
-    }, 1000 * 20); // كل 20 ثانية يفحص
+    }, 1000 * 20); // يفحص كل 20 ثانية
 }
 
 function stopNotifyChecker(){
@@ -267,24 +288,18 @@ function stopNotifyChecker(){
 }
 
 // ======== Initial Load ========
-window.addEventListener('DOMContentLoaded', ()=>{
+window.addEventListener('DOMContentLoaded', async ()=>{
     loadTasks();
     renderTasks();
     updateFilterCounts();
 
-    // تنشيط checker لو لازم والإذن موجود
-    if(notificationsEnabled && Notification.permission === 'granted'){
-        startNotifyChecker();
-    } else {
-        // إذا المخزن يقول مفعّل لكن الإذن مرفوض أو غير معروف: نطفيه
-        if(localStorage.getItem('notifications-enabled') === 'true' && Notification.permission !== 'granted'){
-            notificationsEnabled = false;
-            localStorage.setItem('notifications-enabled','false');
-            setNotifyUIState(false);
-        }
-    }
+    // حالة الإشعارات نحملها لكن لا نُطالب الإذن تلقائياً
+    notificationsEnabled = (localStorage.getItem('notifications-enabled') === 'true') && (Notification && Notification.permission === 'granted');
+    setNotifyUIState(notificationsEnabled);
 
-    // register service worker
+    if(notificationsEnabled) startNotifyChecker();
+
+    // تسجيل Service Worker (ضع المسار الصحيح إذا المشروع في مجلد فرعي)
     if('serviceWorker' in navigator){
         navigator.serviceWorker.register('./sw.js')
         .then(reg=> console.log('Service Worker registered.', reg))
