@@ -291,4 +291,3 @@ window.addEventListener('DOMContentLoaded', ()=>{
         .catch(err=> console.log('Service Worker registration failed:', err));
     }
 });
-// نهاية script.js
