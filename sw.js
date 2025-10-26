@@ -1,15 +1,15 @@
 self.addEventListener('install', e=>{
     e.waitUntil(
         caches.open('todo-cache-v1').then(cache=>{
-            return cache.addAll([
-                './',
-                './index.html',
-                './style.css',
-                './script.js',
-                './manifest.json'
-            ]);
-        })
-    );
+           return cache.addAll([
+               './',
+               './index.html',
+               './style.css',
+               './script.js',
+               './manifest.json'
+           ]);
+       })
+   );
 });
 
 self.addEventListener('fetch', e=>{
@@ -19,3 +19,5 @@ self.addEventListener('fetch', e=>{
         })
     );
 });
+
+/* نهاية sw.js */

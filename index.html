@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>To Do List</title>
+<link rel="stylesheet" href="style.css">
+<link rel="manifest" href="manifest.json">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+</head>
+<body>
+<div class="container">
+    <h1>قائمة المهام الاحترافية</h1>
+    <button id="dark-mode-toggle">🌙 تبديل الوضع الليلي</button>
+
+    <div class="input-section">
+        <input type="text" id="task-input" placeholder="أدخل المهمة هنا...">
+        <input type="time" id="task-time" style="display:none;">
+        <input type="text" id="task-category" placeholder="أدخل تصنيف المهمة 🔖">
+        <button id="notify-toggle">🔔 تنبيه</button>
+        <button id="add-btn">➕ إضافة</button>
+    </div>
+
+    <div class="filter-section">
+        <button class="filter-btn active" data-filter="all">الكل (<span id="all-count">0</span>)</button>
+        <button class="filter-btn" data-filter="completed">المكتملة ✅(<span id="completed-count">0</span>)</button>
+        <button class="filter-btn" data-filter="pending">الغير مكتملة ⏳(<span id="pending-count">0</span>)</button>
+    </div>
+
+    <div id="message-box" class="message-box"></div>
+    <ul id="task-list"></ul>
+    <p class="footer">Powerd by: <a href="https://abdel7amed.github.io/Abdo-webSite/" target="_blank" rel="noopener">Abdelhamed</a></p>
+</div>
+<script src="script.js"></script>
+</body>
+</html>
+
+/* نهاية index.html */
