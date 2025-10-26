@@ -11,7 +11,7 @@ const addBtn = document.getElementById('add-btn');
 const taskList = document.getElementById('task-list');
 const darkModeBtn = document.getElementById('dark-mode-toggle');
 const notifyBtn = document.getElementById('notify-toggle');
-const notifyResetBtn = document.getElementById('notify-reset');
+const notifyTimeInput = document.getElementById('notify-time');
 const filterButtons = document.querySelectorAll('.filter-btn');
 const messageBox = document.getElementById('message-box');
 
@@ -35,19 +35,22 @@ notifyBtn.addEventListener('click', async ()=>{
         if(permission==='granted'){
             notificationsEnabled=true;
             showMessage("تم تفعيل التنبيهات! 🔔");
-        } else { showMessage("لم يتم تفعيل التنبيهات ❌"); }
+            notifyTimeInput.style.display = 'block';
+        } else {
+            showMessage("لم يتم تفعيل التنبيهات ❌");
+            notifyTimeInput.style.display = 'none';
+        }
     } else {
         notificationsEnabled=false;
         showMessage("تم إيقاف التنبيهات 🚫");
+        notifyTimeInput.style.display = 'none';
     }
 });
 
-notifyResetBtn.addEventListener('click', async ()=>{
-    const permission = await Notification.requestPermission();
-    if(permission==='granted'){
-        notificationsEnabled=true;
-        showMessage("تم تفعيل التنبيهات! 🔔");
-    } else { notificationsEnabled=false; showMessage("لم يتم تفعيل التنبيهات ❌"); }
+notifyTimeInput.addEventListener('change', e=>{
+    const notifyTime = e.target.value;
+    localStorage.setItem('notify-time', notifyTime);
+    showMessage(`تم ضبط التذكير الساعة ⏰ ${notifyTime}`);
 });
 
 // ======== Filter ========
@@ -57,6 +60,7 @@ filterButtons.forEach(btn=>{
         filterButtons.forEach(b=>b.classList.remove('active'));
         btn.classList.add('active');
         renderTasks();
+        updateFilterCounts();
     });
 });
 
@@ -69,7 +73,6 @@ function showMessage(msg, duration=2000){
     setTimeout(()=>{ messageBox.classList.remove('show'); }, duration);
 }
 
-// ======== Check Task Time for In-app Messages ========
 function checkTaskTime(task){
     if(!task.time) return;
     const now = new Date();
@@ -90,11 +93,18 @@ function checkTaskTime(task){
     }
 }
 
+// ======== تحديث عدادات الفلاتر ========
+function updateFilterCounts(){
+    document.getElementById('all-count').textContent = tasks.length;
+    document.getElementById('completed-count').textContent = tasks.filter(t=>t.completed).length;
+    document.getElementById('pending-count').textContent = tasks.filter(t=>!t.completed).length;
+}
+
 // ======== إضافة مهمة ========
 addBtn.addEventListener('click', ()=>{
     const text = taskInput.value.trim();
     const time = taskTime.value;
-    const category = taskCategory.value;
+    const category = taskCategory.value.trim() || 'عام';
 
     if(text !== ''){
         const newTask = {
@@ -102,17 +112,16 @@ addBtn.addEventListener('click', ()=>{
             text,
             time: time || '',
             category,
-            completed: false,
-            notified: false,
-            alerted: false
+            completed: false
         };
         tasks.push(newTask);
         saveTasks();
         renderTasks();
-        checkTaskTime(newTask); // <-- تحقق من الموعد
+        updateFilterCounts();
+        checkTaskTime(newTask);
         showMessage(`تم إضافة المهمة 🎉: ${text}`);
         audioAdd.play();
-        taskInput.value=''; taskTime.value=''; taskCategory.value='عمل';
+        taskInput.value=''; taskTime.value=''; taskCategory.value='';
     }
 });
 
@@ -148,6 +157,7 @@ function createTaskElement(task){
             tasks = tasks.filter(t=>t.id !== task.id);
             saveTasks();
             renderTasks();
+            updateFilterCounts();
         }, 300);
     });
     li.appendChild(deleteBtn);
@@ -157,17 +167,17 @@ function createTaskElement(task){
             task.completed = !task.completed;
             saveTasks();
             renderTasks();
+            updateFilterCounts();
             if(task.completed){
                 li.classList.add('flash');
                 audioComplete.play();
-                checkTaskTime(task); // <-- تحقق عند الاكتمال
+                checkTaskTime(task);
                 setTimeout(()=>{ li.classList.remove('flash'); },500);
             }
         }
     });
 
     if(task.completed) li.classList.add('completed');
-    else if(task.category==='عاجل') li.classList.add('urgent');
     else li.classList.add('pending');
 
     return li;
@@ -178,8 +188,8 @@ function renderTasks(){
     taskList.innerHTML='';
     let filteredTasks = tasks;
     if(currentFilter==='completed') filteredTasks = tasks.filter(t=>t.completed);
-    else if(currentFilter==='pending') filteredTasks = tasks.filter(t=>!t.completed && t.category!=='عاجل');
-    else if(currentFilter==='urgent') filteredTasks = tasks.filter(t=>t.category==='عاجل' && !t.completed);
+    else if(currentFilter==='pending') filteredTasks = tasks.filter(t=>!t.completed);
+    else if(currentFilter!=='all') filteredTasks = tasks.filter(t => t.category === currentFilter);
 
     filteredTasks.sort((a,b)=>{
         if(!a.time) return 1;
@@ -190,26 +200,32 @@ function renderTasks(){
     filteredTasks.forEach(task => {
         taskList.appendChild(createTaskElement(task));
     });
+}
 
-    // Drag & Drop
-    taskList.addEventListener('dragover', e=>{
-        e.preventDefault();
-        const afterElement = getDragAfterElement(taskList, e.clientY);
-        const dragging = document.querySelector('.dragging');
+// ======== Drag & Drop ========
+taskList.addEventListener('dragstart', e=>{ e.target.classList.add('dragging'); });
+taskList.addEventListener('dragend', e=>{ e.target.classList.remove('dragging'); });
+
+taskList.addEventListener('dragover', e=>{
+    e.preventDefault();
+    const afterElement = getDragAfterElement(taskList, e.clientY);
+    const dragging = document.querySelector('.dragging');
+    if(dragging){
         if(afterElement == null) taskList.appendChild(dragging);
         else taskList.insertBefore(dragging, afterElement);
-    });
+    }
+});
 
-    taskList.addEventListener('drop', ()=>{
-        const newTasksOrder=[];
-        taskList.querySelectorAll('li').forEach(li=>{
-            const task = tasks.find(t=>t.id==li.dataset.id);
-            if(task) newTasksOrder.push(task);
-        });
-        tasks = newTasksOrder;
-        saveTasks();
+taskList.addEventListener('drop', ()=>{
+    const newTasksOrder=[];
+    taskList.querySelectorAll('li').forEach(li=>{
+        const task = tasks.find(t=>t.id==li.dataset.id);
+        if(task) newTasksOrder.push(task);
     });
-}
+    tasks = newTasksOrder;
+    saveTasks();
+    updateFilterCounts();
+});
 
 function getDragAfterElement(container, y){
     const draggableElements = [...container.querySelectorAll('li:not(.dragging)')];
@@ -230,3 +246,5 @@ if('serviceWorker' in navigator){
 
 // ======== Initial Render ========
 renderTasks();
+updateFilterCounts();
+// ======== تحقق من التنبيهات عند التحميل ========

@@ -12,16 +12,14 @@ h1 { text-align:center; margin-bottom:25px; font-size:32px; font-weight:700; col
 #dark-mode-toggle:hover { background:linear-gradient(45deg, #666, #444); transform: translateY(-2px); }
 
 .input-section { display:flex; gap:12px; margin-bottom:20px; flex-wrap:wrap; }
-#task-input, #task-time, #task-category { flex:1; padding:14px; font-size:16px; border-radius:14px; border:1px solid #ccc; transition:0.3s; }
-#task-input:focus, #task-time:focus, #task-category:focus { outline:none; border-color:#2575fc; box-shadow:0 0 8px rgba(37,117,252,0.5); }
+#task-input, #task-time, #task-category, #notify-time { flex:1; padding:14px; font-size:16px; border-radius:14px; border:1px solid #ccc; transition:0.3s; }
+#task-input:focus, #task-time:focus, #task-category:focus, #notify-time:focus { outline:none; border-color:#2575fc; box-shadow:0 0 8px rgba(37,117,252,0.5); }
 
-#add-btn, #notify-toggle, #notify-reset { padding:14px 22px; font-size:16px; border:none; border-radius:14px; cursor:pointer; font-weight:500; transition: all 0.3s ease; box-shadow:0 6px 12px rgba(0,0,0,0.15); }
+#add-btn, #notify-toggle { padding:14px 22px; font-size:16px; border:none; border-radius:14px; cursor:pointer; font-weight:500; transition: all 0.3s ease; box-shadow:0 6px 12px rgba(0,0,0,0.15); }
 #add-btn { background: linear-gradient(45deg,#28a745,#218838); color:#fff; }
 #add-btn:hover { background: linear-gradient(45deg,#218838,#1e7e34); transform: translateY(-2px); }
 #notify-toggle { background: linear-gradient(45deg,#ffc107,#e0a800); color:#fff; }
 #notify-toggle:hover { background: linear-gradient(45deg,#e0a800,#d39e00); transform: translateY(-2px); }
-#notify-reset { background: linear-gradient(45deg,#17a2b8,#117a8b); color:#fff; }
-#notify-reset:hover { background: linear-gradient(45deg,#117a8b,#0c5460); transform: translateY(-2px); }
 
 .filter-section { text-align:center; margin-bottom:25px; }
 .filter-btn { padding:10px 20px; margin:0 6px; border:none; border-radius:14px; cursor:pointer; font-weight:500; background:#ddd; transition: all 0.3s ease; }
@@ -36,7 +34,7 @@ li { padding:16px; margin-bottom:14px; border-radius:16px; display:flex; justify
 @keyframes fadeIn { to{ opacity:1; transform:translateY(0); } }
 li.completed { background:#d4edda; color:#155724; text-decoration:line-through; }
 li.pending { background:#f9f9f9; color:#333; }
-li.urgent { background:#f8d7da; color:#721c24; font-weight:600; }
+
 li button { border:none; padding:8px 14px; border-radius:10px; cursor:pointer; font-weight:500; transition: all 0.3s ease; }
 li button.delete-btn { background:#dc3545; color:#fff; }
 li button.delete-btn:hover { background:#c82333; transform: translateY(-2px); }
@@ -54,21 +52,15 @@ li.deleting { animation: fadeOut 0.3s ease forwards; }
 body.dark-mode { background:linear-gradient(135deg,#121212,#1a1a1a); color:#eee; }
 body.dark-mode .container { background:#1e1e1e; box-shadow:0 15px 40px rgba(0,0,0,0.7); }
 body.dark-mode h1 { color:#eee; }
-body.dark-mode #task-input, body.dark-mode #task-time, body.dark-mode #task-category { background:#2c2c2c; color:#eee; border:1px solid #555; }
+body.dark-mode #task-input, body.dark-mode #task-time, body.dark-mode #task-category, body.dark-mode #notify-time { background:#2c2c2c; color:#eee; border:1px solid #555; }
 body.dark-mode #add-btn { background: linear-gradient(45deg,#0d6efd,#084298); }
 body.dark-mode #add-btn:hover { background: linear-gradient(45deg,#084298,#0b5ed7); }
 body.dark-mode #notify-toggle { background: linear-gradient(45deg,#ffc107,#e0a800); color:#222; }
-body.dark-mode #notify-reset { background: linear-gradient(45deg,#17a2b8,#117a8b); color:#222; }
-body.dark-mode .filter-btn { background:#555; color:#eee; }
-body.dark-mode .filter-btn.active { background:#0d6efd; color:#fff; }
-body.dark-mode li.pending { background:#2c2c2c; color:#eee; }
-body.dark-mode li.completed { background:#155724; color:#d4edda; }
-body.dark-mode li.urgent { background:#f5c6cb; color:#721c24; }
 
 .footer { text-align:center; margin-top:20px; font-size:14px; color:#555; }
 
 @media(max-width:520px){
     .input-section{flex-direction:column;}
-    #add-btn,#notify-reset,#notify-toggle{width:100%;}
+    #add-btn,#notify-toggle{width:100%;}
     .filter-btn{margin:5px 0; width:48%;}
 }
