@@ -1,27 +1,43 @@
 <!DOCTYPE html>
 <html lang="ar">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>To-Do List احترافية</title>
-    <link rel="stylesheet" href="style.css">
-    <!-- خطوط جميلة من Google Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>To-Do List احترافية</title>
+<link rel="stylesheet" href="style.css">
+<link rel="manifest" href="manifest.json">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
 </head>
 <body>
-    <div class="container">
-        <h1>قائمة المهام الاحترافية</h1>
-        <button id="dark-mode-toggle">تبديل الوضع الليلي</button>
-        <div class="input-section">
-            <input type="text" id="task-input" placeholder="أدخل المهمة هنا...">
-            <input type="time" id="task-time">
-            <button id="add-btn">إضافة</button>
-        </div>
-        <ul id="task-list"></ul>
+<div class="container">
+    <h1>قائمة المهام الاحترافية</h1>
+    <button id="dark-mode-toggle">تبديل الوضع الليلي</button>
+
+    <div class="input-section">
+        <input type="text" id="task-input" placeholder="أدخل المهمة هنا...">
+        <input type="time" id="task-time">
+        <select id="task-category">
+            <option value="عمل">💼 عمل</option>
+            <option value="شخصي">🏠 شخصي</option>
+            <option value="عاجل">⚡ عاجل</option>
+        </select>
+        <button id="notify-toggle">تنبيه 🔔</button>
+        <button id="notify-reset">إعادة طلب الإشعارات 🔄</button>
+        <button id="add-btn">إضافة</button>
     </div>
 
-    <script src="script.js"></script>
+    <div class="filter-section">
+        <button data-filter="all" class="filter-btn active">الكل</button>
+        <button data-filter="completed" class="filter-btn">المكتملة</button>
+        <button data-filter="pending" class="filter-btn">الغير مكتملة</button>
+        <button data-filter="urgent" class="filter-btn">عاجلة ⚡</button>
+    </div>
+
+    <ul id="task-list"></ul>
+    <p class="footer">Powerd by: Abdelhamed</p>
+</div>
+<script src="script.js"></script>
 </body>
 </html>
