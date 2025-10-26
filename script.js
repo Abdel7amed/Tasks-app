@@ -1,4 +1,4 @@
-// ======== أصوات افكت من النت ========
+// ======== أصوات افكت ========
 const audioAdd = new Audio('https://www.soundjay.com/buttons/sounds/button-3.mp3');
 const audioDelete = new Audio('https://www.soundjay.com/buttons/sounds/button-10.mp3');
 const audioComplete = new Audio('https://www.soundjay.com/buttons/sounds/button-4.mp3');
@@ -183,12 +183,14 @@ function createTaskElement(task){
     return li;
 }
 
-// ======== عرض المهام ========
+// ======== عرض المهام مع دعم الفلترة ========
 function renderTasks(){
     taskList.innerHTML='';
     let filteredTasks = tasks;
+
     if(currentFilter==='completed') filteredTasks = tasks.filter(t=>t.completed);
     else if(currentFilter==='pending') filteredTasks = tasks.filter(t=>!t.completed);
+    // currentFilter ممكن يكون تصنيف، نتركه افتراضي للكل
     else if(currentFilter!=='all') filteredTasks = tasks.filter(t => t.category === currentFilter);
 
     filteredTasks.sort((a,b)=>{
@@ -247,4 +249,3 @@ if('serviceWorker' in navigator){
 // ======== Initial Render ========
 renderTasks();
 updateFilterCounts();
-// ======== تحقق من التنبيهات عند التحميل ========
