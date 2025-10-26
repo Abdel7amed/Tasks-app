@@ -1,115 +1,182 @@
-const taskInput=document.getElementById('task-input');
-const taskTime=document.getElementById('task-time');
-const taskCategory=document.getElementById('task-category');
-const addBtn=document.getElementById('add-btn');
-const taskList=document.getElementById('task-list');
-const darkModeBtn=document.getElementById('dark-mode-toggle');
-const notifyBtn=document.getElementById('notify-toggle');
-const notifyResetBtn=document.getElementById('notify-reset');
-const filterButtons=document.querySelectorAll('.filter-btn');
+// ======== أصوات افكت من النت ========
+const audioAdd = new Audio('https://www.soundjay.com/buttons/sounds/button-3.mp3');
+const audioDelete = new Audio('https://www.soundjay.com/buttons/sounds/button-10.mp3');
+const audioComplete = new Audio('https://www.soundjay.com/buttons/sounds/button-4.mp3');
 
-let tasks=JSON.parse(localStorage.getItem('tasks'))||[];
-let notificationsEnabled=false;
-let currentFilter='all';
+// ======== عناصر الصفحة ========
+const taskInput = document.getElementById('task-input');
+const taskTime = document.getElementById('task-time');
+const taskCategory = document.getElementById('task-category');
+const addBtn = document.getElementById('add-btn');
+const taskList = document.getElementById('task-list');
+const darkModeBtn = document.getElementById('dark-mode-toggle');
+const notifyBtn = document.getElementById('notify-toggle');
+const notifyResetBtn = document.getElementById('notify-reset');
+const filterButtons = document.querySelectorAll('.filter-btn');
+const messageBox = document.getElementById('message-box');
 
-// Dark Mode
-if(localStorage.getItem('dark-mode')==='enabled'){document.body.classList.add('dark-mode');}
-darkModeBtn.addEventListener('click',()=>{document.body.classList.toggle('dark-mode');localStorage.setItem('dark-mode',document.body.classList.contains('dark-mode')?'enabled':'disabled');});
+let tasks = JSON.parse(localStorage.getItem('tasks')) || [];
+let notificationsEnabled = false;
+let currentFilter = 'all';
 
-// Notifications
-notifyBtn.addEventListener('click',async()=>{
+// ======== Dark Mode ========
+if(localStorage.getItem('dark-mode')==='enabled'){
+    document.body.classList.add('dark-mode');
+}
+darkModeBtn.addEventListener('click', ()=>{
+    document.body.classList.toggle('dark-mode');
+    localStorage.setItem('dark-mode', document.body.classList.contains('dark-mode') ? 'enabled' : 'disabled');
+});
+
+// ======== Notifications ========
+notifyBtn.addEventListener('click', async ()=>{
     if(!notificationsEnabled){
-        const permission=await Notification.requestPermission();
-        if(permission==='granted'){notificationsEnabled=true; alert("تم تفعيل التنبيهات! 🔔");}
-        else{alert("لم يتم تفعيل التنبيهات ❌");}
-    }else{notificationsEnabled=false; alert("تم إيقاف التنبيهات 🚫");}
-});
-notifyResetBtn.addEventListener('click',async()=>{
-    const permission=await Notification.requestPermission();
-    if(permission==='granted'){notificationsEnabled=true; alert("تم تفعيل التنبيهات! 🔔");}
-    else{notificationsEnabled=false; alert("لم يتم تفعيل التنبيهات ❌");}
+        const permission = await Notification.requestPermission();
+        if(permission==='granted'){
+            notificationsEnabled=true;
+            showMessage("تم تفعيل التنبيهات! 🔔");
+        } else { showMessage("لم يتم تفعيل التنبيهات ❌"); }
+    } else {
+        notificationsEnabled=false;
+        showMessage("تم إيقاف التنبيهات 🚫");
+    }
 });
 
-// Filter
+notifyResetBtn.addEventListener('click', async ()=>{
+    const permission = await Notification.requestPermission();
+    if(permission==='granted'){
+        notificationsEnabled=true;
+        showMessage("تم تفعيل التنبيهات! 🔔");
+    } else { notificationsEnabled=false; showMessage("لم يتم تفعيل التنبيهات ❌"); }
+});
+
+// ======== Filter ========
 filterButtons.forEach(btn=>{
-    btn.addEventListener('click',()=>{
-        currentFilter=btn.dataset.filter;
+    btn.addEventListener('click', ()=>{
+        currentFilter = btn.dataset.filter;
         filterButtons.forEach(b=>b.classList.remove('active'));
         btn.classList.add('active');
         renderTasks();
     });
 });
 
-function saveTasks(){localStorage.setItem('tasks',JSON.stringify(tasks));}
+// ======== Helper Functions ========
+function saveTasks(){ localStorage.setItem('tasks', JSON.stringify(tasks)); }
 
-function randomMessage(type){
-    const before=["جاهز تنجز المهمة؟ 💪","يلا شد حيلك 😎","فرصة عظيمة لإتمامها 🌟"];
-    const missed=["لقد فاتك الوقت ⏰، حاول تعوض! 🚀","أووووه 😬، اتأخرت شوية","لازم نتحرك بسرعة ⚡"];
-    const late=["انتهيت أخيرًا 👍، بس اتأخرت 😅","أخدت وقتك 😅، حاول أسرع المرة القادمة","حسنا، المهمة تمت ✅"];
-    if(type==='before') return before[Math.floor(Math.random()*before.length)];
-    if(type==='missed') return missed[Math.floor(Math.random()*missed.length)];
-    if(type==='late') return late[Math.floor(Math.random()*late.length)];
-    return "";
+function showMessage(msg, duration=2000){
+    messageBox.textContent = msg;
+    messageBox.classList.add('show');
+    setTimeout(()=>{ messageBox.classList.remove('show'); }, duration);
 }
 
-function createTaskElement(task){
-    const li=document.createElement('li');
-    li.dataset.id=task.id;
-    li.dataset.category=task.category;
-    li.draggable=true;
+// ======== Check Task Time for In-app Messages ========
+function checkTaskTime(task){
+    if(!task.time) return;
+    const now = new Date();
+    const [hour, minute] = task.time.split(':').map(Number);
+    const taskDate = new Date();
+    taskDate.setHours(hour, minute, 0, 0);
 
-    const taskText=document.createElement('span');
-    taskText.textContent=task.text;
+    if(!task.completed && now > taskDate){
+        showMessage(`⏰ يا نهار أبيض! انت متأخر عن المهمة: ${task.text}`, 2500);
+    } else if(task.completed && now < taskDate){
+        const phrases = [
+            `🌟 ممتاز! خلصت المهمة بدري: ${task.text}`,
+            `👍 عمل رائع قبل الموعد: ${task.text}`,
+            `🎉 مبروك! المهمة خلصت قبل الوقت: ${task.text}`
+        ];
+        const msg = phrases[Math.floor(Math.random()*phrases.length)];
+        showMessage(msg, 2500);
+    }
+}
+
+// ======== إضافة مهمة ========
+addBtn.addEventListener('click', ()=>{
+    const text = taskInput.value.trim();
+    const time = taskTime.value;
+    const category = taskCategory.value;
+
+    if(text !== ''){
+        const newTask = {
+            id: Date.now(),
+            text,
+            time: time || '',
+            category,
+            completed: false,
+            notified: false,
+            alerted: false
+        };
+        tasks.push(newTask);
+        saveTasks();
+        renderTasks();
+        checkTaskTime(newTask); // <-- تحقق من الموعد
+        showMessage(`تم إضافة المهمة 🎉: ${text}`);
+        audioAdd.play();
+        taskInput.value=''; taskTime.value=''; taskCategory.value='عمل';
+    }
+});
+
+taskInput.addEventListener('keypress', e=>{ if(e.key==='Enter') addBtn.click(); });
+
+// ======== إنشاء عنصر المهمة ========
+function createTaskElement(task){
+    const li = document.createElement('li');
+    li.dataset.id = task.id;
+    li.dataset.category = task.category;
+    li.draggable = true;
+    li.classList.add('added');
+
+    const taskText = document.createElement('span');
+    taskText.textContent = task.text;
     li.appendChild(taskText);
 
     if(task.time){
-        const timeLabel=document.createElement('span');
-        timeLabel.className='time-label';
-        timeLabel.textContent=task.time;
+        const timeLabel = document.createElement('span');
+        timeLabel.className = 'time-label';
+        timeLabel.textContent = task.time;
         li.appendChild(timeLabel);
     }
 
-    const deleteBtn=document.createElement('button');
-    deleteBtn.textContent='حذف'; deleteBtn.className='delete-btn';
-    deleteBtn.addEventListener('click',()=>{
-        li.style.opacity='0';
-        setTimeout(()=>{tasks=tasks.filter(t=>t.id!==task.id); saveTasks(); renderTasks();},300);
+    const deleteBtn = document.createElement('button');
+    deleteBtn.textContent = 'حذف';
+    deleteBtn.className = 'delete-btn';
+    deleteBtn.addEventListener('click', ()=>{
+        li.classList.add('deleting');
+        audioDelete.play();
+        showMessage(`تم حذف المهمة ❌: ${task.text}`);
+        setTimeout(()=>{
+            tasks = tasks.filter(t=>t.id !== task.id);
+            saveTasks();
+            renderTasks();
+        }, 300);
     });
     li.appendChild(deleteBtn);
 
     li.addEventListener('click', e=>{
-        if(e.target.tagName!=='BUTTON'){task.completed=!task.completed; saveTasks(); renderTasks();}
+        if(e.target.tagName !== 'BUTTON'){
+            task.completed = !task.completed;
+            saveTasks();
+            renderTasks();
+            if(task.completed){
+                li.classList.add('flash');
+                audioComplete.play();
+                checkTaskTime(task); // <-- تحقق عند الاكتمال
+                setTimeout(()=>{ li.classList.remove('flash'); },500);
+            }
+        }
     });
 
-    // تصنيف المهمة + ألوان
     if(task.completed) li.classList.add('completed');
     else if(task.category==='عاجل') li.classList.add('urgent');
     else li.classList.add('pending');
 
-    const now=new Date();
-    const currentTime=now.toTimeString().slice(0,5);
-    if(!task.completed && task.time===currentTime && !task.alerted && notificationsEnabled){
-        new Notification(randomMessage('before'),{body:task.text});
-        task.alerted=true; saveTasks();
-    }
-
     return li;
 }
 
-function getDragAfterElement(container,y){
-    const draggableElements=[...container.querySelectorAll('li:not(.dragging)')];
-    return draggableElements.reduce((closest,child)=>{
-        const box=child.getBoundingClientRect();
-        const offset=y-box.top-box.height/2;
-        if(offset<0 && offset>closest.offset) return {offset:offset,element:child};
-        else return closest;
-    },{offset:Number.NEGATIVE_INFINITY}).element;
-}
-
+// ======== عرض المهام ========
 function renderTasks(){
     taskList.innerHTML='';
     let filteredTasks = tasks;
-
     if(currentFilter==='completed') filteredTasks = tasks.filter(t=>t.completed);
     else if(currentFilter==='pending') filteredTasks = tasks.filter(t=>!t.completed && t.category!=='عاجل');
     else if(currentFilter==='urgent') filteredTasks = tasks.filter(t=>t.category==='عاجل' && !t.completed);
@@ -120,37 +187,46 @@ function renderTasks(){
         return a.time.localeCompare(b.time);
     });
 
-    filteredTasks.forEach(task=>{ taskList.appendChild(createTaskElement(task)); });
+    filteredTasks.forEach(task => {
+        taskList.appendChild(createTaskElement(task));
+    });
 
+    // Drag & Drop
     taskList.addEventListener('dragover', e=>{
         e.preventDefault();
-        const afterElement=getDragAfterElement(taskList,e.clientY);
-        const dragging=document.querySelector('.dragging');
-        if(afterElement==null) taskList.appendChild(dragging);
-        else taskList.insertBefore(dragging,afterElement);
+        const afterElement = getDragAfterElement(taskList, e.clientY);
+        const dragging = document.querySelector('.dragging');
+        if(afterElement == null) taskList.appendChild(dragging);
+        else taskList.insertBefore(dragging, afterElement);
     });
 
     taskList.addEventListener('drop', ()=>{
         const newTasksOrder=[];
         taskList.querySelectorAll('li').forEach(li=>{
-            const task=tasks.find(t=>t.id==li.dataset.id);
+            const task = tasks.find(t=>t.id==li.dataset.id);
             if(task) newTasksOrder.push(task);
         });
-        tasks=newTasksOrder; saveTasks();
+        tasks = newTasksOrder;
+        saveTasks();
     });
 }
 
-addBtn.addEventListener('click', ()=>{
-    const text=taskInput.value.trim(); const time=taskTime.value; const category=taskCategory.value;
-    if(text!==''){
-        const newTask={id:Date.now(),text,time:time||'',category:category,completed:false,notified:false,alerted:false};
-        tasks.push(newTask); saveTasks(); renderTasks();
-        taskInput.value=''; taskTime.value=''; taskCategory.value='عمل';
-    }
-});
-taskInput.addEventListener('keypress', e=>{ if(e.key==='Enter') addBtn.click(); });
+function getDragAfterElement(container, y){
+    const draggableElements = [...container.querySelectorAll('li:not(.dragging)')];
+    return draggableElements.reduce((closest, child)=>{
+        const box = child.getBoundingClientRect();
+        const offset = y - box.top - box.height/2;
+        if(offset < 0 && offset > closest.offset) return {offset: offset, element: child};
+        else return closest;
+    }, {offset: Number.NEGATIVE_INFINITY}).element;
+}
 
-// Service Worker PWA
-if('serviceWorker' in navigator){ window.addEventListener('load',()=>{ navigator.serviceWorker.register('sw.js'); }); }
+// ======== Service Worker PWA ========
+if('serviceWorker' in navigator){
+    window.addEventListener('load', ()=>{
+        navigator.serviceWorker.register('sw.js');
+    });
+}
 
+// ======== Initial Render ========
 renderTasks();
