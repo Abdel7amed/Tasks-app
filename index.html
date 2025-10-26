@@ -1,96 +1,27 @@
-<!doctype html>
-<html lang="ar" dir="rtl">
+<!DOCTYPE html>
+<html lang="ar">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Tasks • قائمة المهام</title>
-
-  <meta name="theme-color" content="#4f46e5">
-  <link rel="manifest" href="./manifest.json">
-  <link rel="stylesheet" href="./styles.css">
-  <link rel="icon" href='data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" rx="20" fill="%234f46e5"/><text x="50" y="58" font-size="48" text-anchor="middle" fill="white" font-family="Arial">✓</text></svg>'>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>To-Do List احترافية</title>
+    <link rel="stylesheet" href="style.css">
+    <!-- خطوط جميلة من Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
 </head>
-<body class="theme-light">
-
-  <main class="app-root" id="appRoot">
-    <header class="app-header" role="banner">
-      <div class="brand">
-        <h1>قائمة المهام</h1>
-        <p class="subtitle">سريع • أنيق • يعمل أوفلاين</p>
-      </div>
-
-      <div class="controls">
-        <button id="themeToggle" class="btn-icon" aria-label="تبديل الوضع">🌙</button>
-        <button id="installBtn" class="btn" aria-hidden="true">تثبيت</button>
-      </div>
-    </header>
-
-    <section class="todo-card" aria-labelledby="mainLabel">
-      <h2 id="mainLabel" class="visually-hidden">تطبيق قائمة المهام</h2>
-
-      <form id="taskForm" class="task-form" autocomplete="off" aria-label="إضافة مهمة">
-        <input id="taskInput" name="task" placeholder="اكتب مهمة ثم اضغط Enter أو اضغط إضافة" maxlength="300" aria-label="نص المهمة" />
-        <input id="tagsInput" placeholder="تسمية (مثال: دراسة, عمل) - فَصْل بعلامة , " aria-label="تسميات المهمة" />
-        <input id="dueInput" type="datetime-local" aria-label="تاريخ ووقت الاستحقاق" />
-        <select id="prioritySelect" aria-label="أولوية">
-          <option value="normal">عادي</option>
-          <option value="high">عالي</option>
-          <option value="low">منخفض</option>
-        </select>
-        <div class="form-actions">
-          <button id="addBtn" class="btn" type="submit">إضافة</button>
+<body>
+    <div class="container">
+        <h1>قائمة المهام الاحترافية</h1>
+        <button id="dark-mode-toggle">تبديل الوضع الليلي</button>
+        <div class="input-section">
+            <input type="text" id="task-input" placeholder="أدخل المهمة هنا...">
+            <input type="time" id="task-time">
+            <button id="add-btn">إضافة</button>
         </div>
-      </form>
+        <ul id="task-list"></ul>
+    </div>
 
-      <div class="row filters-row">
-        <div class="left">
-          <select id="filterSelect" aria-label="تصفية">
-            <option value="all">كل المهام</option>
-            <option value="active">غير مكتملة</option>
-            <option value="completed">مكتملة</option>
-          </select>
-
-          <select id="sortSelect" aria-label="ترتيب">
-            <option value="newest">الأحدث أولاً</option>
-            <option value="oldest">الأقدم أولاً</option>
-            <option value="duedate">حسب موعد الاستحقاق</option>
-            <option value="priority">حسب الأولوية</option>
-          </select>
-
-          <select id="tagFilter" aria-label="فلتر حسب تسمية">
-            <option value="all">كل التسميات</option>
-          </select>
-        </div>
-
-        <div class="right">
-          <input id="searchInput" placeholder="ابحث عن مهمة..." aria-label="بحث" />
-          <div class="stats" aria-hidden="true">
-            <span id="countAll">0</span> / <span id="countCompleted">0</span>
-          </div>
-        </div>
-      </div>
-
-      <ul id="taskList" class="task-list" aria-live="polite"></ul>
-
-      <div class="footer-actions">
-        <div class="left-actions">
-          <button id="clearCompleted" class="link">مسح المكتملة</button>
-          <button id="clearAll" class="link danger">مسح الكل</button>
-        </div>
-        <div class="right-actions">
-          <small class="muted">تم تطويره بواسطة <strong>Abdelhamed</strong></small>
-        </div>
-      </div>
-    </section>
-  </main>
-
-  <!-- toast area -->
-  <div id="toast" class="toast" aria-live="assertive" aria-atomic="true" hidden></div>
-
-  <noscript>
-    <div class="noscript">يحتاج المتصفح إلى تفعيل JavaScript لتشغيل التطبيق.</div>
-  </noscript>
-
-  <script src="./app.js" defer></script>
+    <script src="script.js"></script>
 </body>
 </html>
